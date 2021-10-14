@@ -1,0 +1,15 @@
+body {
+    margin: 20px;
+}
+
+.nav-bar {
+    margin-bottom: 20px;
+}
+
+.nav-bar__link {
+    margin-right: 5px;
+}
+
+.employee-created-message {
+    color: #00BB00;
+}
