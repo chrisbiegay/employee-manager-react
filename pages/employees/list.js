@@ -1,6 +1,11 @@
 import EmployeeLayout from "../../components/employeeLayout"
-import fs from 'fs'
-import path from 'path'
+import fs from "fs"
+import path from "path"
+
+
+// TODO - refactor employee persistence
+
+
 
 const employeesFile = path.join(process.cwd(), "resources/employee-data.json")
 
@@ -21,15 +26,18 @@ export default function ListEmployees({ employees }) {
       <h1>Employees</h1>
 
       <table>
+        <thead>
           <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Actions</th>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Department</th>
+            <th>Actions</th>
           </tr>
+        </thead>
+        <tbody>
           {
             employees.map(({id, name, department}) => (
-              <tr>
+              <tr key={id}>
                   <td>{id}</td>
                   <td>{name}</td>
                   <td>{department}</td>
@@ -39,6 +47,7 @@ export default function ListEmployees({ employees }) {
               </tr>
             ))
           }
+        </tbody>
       </table>
     </EmployeeLayout>
   )
