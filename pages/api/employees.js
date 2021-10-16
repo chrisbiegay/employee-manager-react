@@ -21,6 +21,15 @@ function fetchAll(req, res) {
 }
 
 function create(req, res) {
-  employeePersistence.create(req.body)
-  res.status(201).end("Created")
+  try {
+    employeePersistence.create(JSON.parse(req.body))
+    res.status(201).end("Created")
+  } catch (e) {
+    if (e === "INVALID_EMPLOYEE_DATA") {
+      res.status(400).end()
+    } else {
+      res.status(500).end()
+    }
+  }
+
 }
