@@ -10,6 +10,10 @@ body {
     margin-right: 5px;
 }
 
-.employee-created-message {
+.success-message {
     color: #00BB00;
+}
+
+.failure-message {
+    color: #AA0000;
 }
