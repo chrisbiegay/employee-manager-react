@@ -8,7 +8,7 @@ export default function CreateEmployee() {
       </div>*/}
 
       <h1>Create Employee</h1>
-      <form action="/employees" method="post">
+      <form action="/api/employees" method="post">
           <div className="row">
               <div className="two columns"><label htmlFor="name">Name:</label></div>
               <div className="ten columns"><input type="text" id="name" name="name" /></div>

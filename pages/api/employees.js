@@ -3,12 +3,21 @@
 import * as employeePersistence from "../../lib/employeePersistence"
 
 export default function handler(req, res) {
-  if (req.method.toUpperCase() === "POST") {
-    create(req, res)
-  } else {
-    res.setHeader("Allow", ["POST"])
-    res.status(405).end(`Method ${req.method} not allowed`)
+  switch (req.method) {
+    case "GET":
+      fetchAll(req, res)
+      break
+    case "POST":
+      create(req, res)
+      break
+    default:
+      res.setHeader("Allow", ["POST"])
+      res.status(405).end(`Method ${req.method} not allowed`)
   }
+}
+
+function fetchAll(req, res) {
+  res.status(200).json(employeePersistence.fetchAll())
 }
 
 function create(req, res) {
