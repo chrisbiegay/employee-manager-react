@@ -1,4 +1,4 @@
-import EmployeeLayout from "../../components/employeeLayout"
+import EmployeeLayout from "../../features/employees/employeeLayout"
 import React, { useState } from 'react';
 
 export default function CreateEmployee() {

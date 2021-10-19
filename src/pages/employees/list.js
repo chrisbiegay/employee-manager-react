@@ -1,5 +1,5 @@
-import EmployeeLayout from "../../components/employeeLayout"
-import * as employeePersistence from "../../lib/employeePersistence"
+import EmployeeLayout from "../../features/employees/employeeLayout"
+import * as employeePersistence from "../../features/employees/employeePersistence"
 import React, { useState } from 'react';
 
 // Implicitly invoked by Next.js.  Result is passed to the default function, ListEmployees.

@@ -1,6 +1,6 @@
 // https://nextjs.org/docs/api-routes/introduction
 
-import * as employeePersistence from "../../lib/employeePersistence"
+import * as employeePersistence from "../../features/employees/employeePersistence"
 
 export default function handler(req, res) {
   switch (req.method) {

@@ -2,7 +2,7 @@
  * Handle API requests to /api/employees/{employeeId}.
  */
 
-import * as employeePersistence from "../../../lib/employeePersistence"
+import * as employeePersistence from "../../../features/employees/employeePersistence"
 
 export default function handler(req, res) {
   if (req.method.toUpperCase() === "DELETE") {
