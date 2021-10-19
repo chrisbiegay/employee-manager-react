@@ -5,10 +5,11 @@ Created using [Next.js](https://nextjs.org/).
 Technologies demonstrated:
 * React
 * Next.js
-* ...
+* Couchbase
 
 # Prerequisites
-* Node.js v12.22.7 
+* Node.js v12.22.7
+* Docker or Couchbase server
 
 # Project Creation
 These steps were used to create the project.
@@ -29,7 +30,7 @@ yarn add couchbase
 2. After a few seconds open the Admin UI at http://localhost:8091.
 3. Create a new cluster named **employees**, along with an admin user and password.
 4. Create a bucket named **employees**. Under **Advanced bucket settings** uncheck **Replicas/Enable**.
-5. Create a user with username **employees-app** and give it access to the **employees** bucket.
+5. Create a user with username **employees-app** and password **password** and give it access to the **employees** bucket.
 
 To stop and start Couchbase:
 ```
