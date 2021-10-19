@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 
 // Implicitly invoked by Next.js.  Result is passed to the default function, ListEmployees.
 export async function getServerSideProps(/* context */) {
-  const employees = employeePersistence.fetchAll()
+  const employees = await employeePersistence.fetchAll()
 
   return {
     props: {

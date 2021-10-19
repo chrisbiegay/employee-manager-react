@@ -6,18 +6,18 @@ import * as employeePersistence from "../../../lib/employeePersistence"
 
 export default function handler(req, res) {
   if (req.method.toUpperCase() === "DELETE") {
-    deleteEmployee(req, res)
+    return deleteEmployee(req, res)
   } else {
     res.setHeader("Allow", ["DELETE"])
     res.status(405).end(`Method ${req.method} not allowed`)
   }
 }
 
-function deleteEmployee(req, res) {
+async function deleteEmployee(req, res) {
   const employeeId = getEmployeeIdFromRequest(req)
 
   try {
-    employeePersistence.deleteEmployee(employeeId)
+    await employeePersistence.deleteEmployee(employeeId)
     res.status(204).end()
   } catch (e) {
     if (e === "EMPLOYEE_NOT_FOUND") {
@@ -29,6 +29,7 @@ function deleteEmployee(req, res) {
   }
 }
 
+// Better way to do this with Next.js?
 function getEmployeeIdFromRequest(req) {
   const uriParts = req.url.split("/")
   return parseInt(uriParts[uriParts.length - 1])
