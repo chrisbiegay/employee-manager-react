@@ -3,7 +3,7 @@ import * as couchbase from "couchbase"
 const BUCKET_NAME = "employees"
 const MAX_EMPLOYEE_ID_DOC_ID = "employee_metadata::maxId"
 
-// Should only be referenced from lazy-loading accessor methods
+// initCouchbase() must execute and resolve before referencing couchbaseClient.
 const couchbaseClient = {
   cluster: null,
   employeesBucket: null,
@@ -11,22 +11,25 @@ const couchbaseClient = {
 }
 
 export async function fetchAllEmployees() {
-  const cluster = await couchbaseCluster()
+  // The standard Next.js server doesn't seem to have a hook for executing custom server code at startup,
+  // so calling initCouchbase() for each API function.
+  await initCouchbase()
 
   // Should improve the way this query targets employee documents, e.g. to ignore the "maxId" document.
   // Possibly add a "type" property to the documents and index it, etc.
-  let result = await cluster.query(
+  let result = await couchbaseClient.cluster.query(
     `select employees.* from ${BUCKET_NAME} where meta().id >= "employee::" and meta().id <= "employee_"`)
   return result.rows
 }
 
 export async function createEmployee({name, department}) {
+  await initCouchbase()
+
   // Couchbase transactions are not available with the Javascript API :(
 
   const nextEmployeeId = await getNextEmployeeId()
-  const collection = await defaultCollection()
 
-  await collection.insert(employeeIdToDocumentId(nextEmployeeId), JSON.stringify(
+  await couchbaseClient.defaultCollection.insert(employeeIdToDocumentId(nextEmployeeId), JSON.stringify(
     {
       id: nextEmployeeId,
       name,
@@ -36,58 +39,34 @@ export async function createEmployee({name, department}) {
 }
 
 export async function deleteEmployee(employeeId) {
-  const collection = await defaultCollection()
+  await initCouchbase()
 
   // needs error handling
-  return collection.remove(employeeIdToDocumentId(employeeId))
+  return couchbaseClient.defaultCollection.remove(employeeIdToDocumentId(employeeId))
 }
 
 /**
- * Get the singleton Couchbase client for the cluster.
- *
- * Lazily loaded since the standard Next.js server doesn't seem to have a hook for executing custom
- * server code at startup.
+ * Connect to Couchbase and initialize the couchbaseClient object.
  */
-async function couchbaseCluster() {
+async function initCouchbase() {
   if (!couchbaseClient.cluster) {
     couchbaseClient.cluster = await couchbase.connect('couchbase://localhost', {
       username: 'employees-app',
       password: 'password',       // just an experimental app
     })
-    console.log("Couchbase client initialized")
   }
 
-  return couchbaseClient.cluster
-}
-
-/**
- * Get the employees bucket.
- */
-async function employeesBucket() {
   if (!couchbaseClient.employeesBucket) {
-    const cluster = await couchbaseCluster()
-    const buckets = await cluster.buckets().getAllBuckets()
+    const buckets = await couchbaseClient.cluster.buckets().getAllBuckets()
     if (!buckets.find(bucket => bucket.name === BUCKET_NAME)) {
       console.error(`FATAL: No Couchbase bucket named "${BUCKET_NAME}" found`)
       throw "INVALID_COUCHBASE_STATE"
     }
 
-    couchbaseClient.employeesBucket = cluster.bucket(BUCKET_NAME)
+    couchbaseClient.employeesBucket = await couchbaseClient.cluster.bucket(BUCKET_NAME)
+    couchbaseClient.defaultCollection = await couchbaseClient.employeesBucket.defaultCollection()
+    console.log("Couchbase client initialized")
   }
-
-  return couchbaseClient.employeesBucket
-}
-
-/**
- * Get the default collection in the default scope for the employees bucket.
- */
-async function defaultCollection() {
-  if (!couchbaseClient.defaultCollection) {
-    const bucket = await employeesBucket()
-    couchbaseClient.defaultCollection = bucket.defaultCollection()
-  }
-
-  return couchbaseClient.defaultCollection
 }
 
 function employeeIdToDocumentId(employeeId) {
@@ -98,18 +77,19 @@ function employeeIdToDocumentId(employeeId) {
  * Increment and return the maximum employee ID.
  */
 async function getNextEmployeeId() {
+  await initCouchbase()
+
   try {
     // ideally do this in a loop in case there's a CAS mismatch
 
-    const collection = await defaultCollection()
-    const maxIdResult = await collection.get(MAX_EMPLOYEE_ID_DOC_ID)
+    const maxIdResult = await couchbaseClient.defaultCollection.get(MAX_EMPLOYEE_ID_DOC_ID)
 
     // why does this sometimes return a JSON string and sometimes an object?
     const maxIdDoc = typeof maxIdResult.content === "string" ? JSON.parse(maxIdResult.content) : maxIdResult.content
 
     maxIdDoc.maxEmployeeId = maxIdDoc.maxEmployeeId + 1
 
-    await collection.replace(MAX_EMPLOYEE_ID_DOC_ID, maxIdDoc, { cas: maxIdResult.cas })
+    await couchbaseClient.defaultCollection.replace(MAX_EMPLOYEE_ID_DOC_ID, maxIdDoc, { cas: maxIdResult.cas })
     return maxIdDoc.maxEmployeeId
   } catch (e) {
     if (e.hasOwnProperty("name") && e.name === "DocumentNotFoundError") {
@@ -126,8 +106,8 @@ async function getNextEmployeeId() {
  * Create the Couchbase doc which tracks the maximum employee ID.
  */
 async function createMaxIdDoc(maxId) {
-  const collection = await defaultCollection()
-  return collection.insert(MAX_EMPLOYEE_ID_DOC_ID, JSON.stringify(
+  await initCouchbase()
+  return couchbaseClient.defaultCollection.insert(MAX_EMPLOYEE_ID_DOC_ID, JSON.stringify(
     {
       maxEmployeeId: maxId,
     }
