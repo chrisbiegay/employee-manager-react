@@ -15,7 +15,7 @@ Technologies demonstrated:
 These steps were used to create the project.
 ```
 nvm use lts/erbium
-npx create-next-app@latest
+npx create-next-app@latest employee-manager
 cd employee-manager
 yarn add couchbase
 ```

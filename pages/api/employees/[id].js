@@ -1,6 +1,6 @@
-//
-// Handle API requests to /api/employees/{employeeId}.
-//
+/*
+ * Handle API requests to /api/employees/{employeeId}.
+ */
 
 import * as employeePersistence from "../../../lib/employeePersistence"
 
