@@ -50,9 +50,13 @@ export async function deleteEmployee(employeeId) {
  */
 async function initCouchbase() {
   if (!couchbaseClient.cluster) {
-    couchbaseClient.cluster = await couchbase.connect('couchbase://localhost', {
-      username: 'employees-app',
-      password: 'password',       // just an experimental app
+    const host = process.env.EMPLOYEE_CB_HOST || 'localhost'
+    const username = process.env.EMPLOYEE_CB_USERNAME || 'employees-app'
+    const password = process.env.EMPLOYEE_CB_PASSWORD || 'password'
+
+    couchbaseClient.cluster = await couchbase.connect(`couchbase://${host}`, {
+      username,
+      password,
     })
   }
 
